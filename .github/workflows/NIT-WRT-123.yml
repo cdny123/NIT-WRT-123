@@ -57,6 +57,11 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
+    - name: 设置环境
+      run: |
+        sudo apt-get update || exit 1
+        sudo apt-get install -y --fix-missing php* dotnet* llvm* || exit 1
+    
     - name: 安装编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -81,6 +86,18 @@ jobs:
       shell: bash {0}
       continue-on-error: false # 失败则停止工作流
 
+    - name: 更新 Feeds
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+    
+    - name: 安装 Go
+      run: |
+        wget https://golang.org/dl/go1.24.2.linux-amd64.tar.gz
+        sudo tar -C /usr/local -xzf go1.24.2.linux-amd64.tar.gz
+        export PATH=$PATH:/usr/local/go/bin
+        go version
+    
     - name: 添加外部插件
       run: |
         if [ -e $FEEDS_CONF ]; then
