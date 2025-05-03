@@ -36,19 +36,19 @@ jobs:
     - name: 检查代码
       uses: actions/checkout@v3
 
-   - name: 设置 Python
-     uses: actions/setup-python@v4
-     with:
-       python-version: '3.8'
+    - name: 设置 Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
 
-   - name: 安装依赖项
-     run: |
-       pip install --upgrade pip
-       pip install -r requirements.txt
+    - name: 安装依赖项
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
-   - name: 运行测试
-     run: |
-       python -m unittest discover
+    - name: 运行测试
+      run: |
+        python -m unittest discover
           
     - name: 初始化编译环境
       env:
