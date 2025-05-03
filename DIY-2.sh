@@ -1,48 +1,23 @@
 #!/bin/bash
-# 设置默认主题
-sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' .config
-echo "CONFIG_PACKAGE_luci-theme-argon=y" >> .config
-echo "CONFIG_PACKAGE_luci-theme-infinityfreedom-ng=y" >> .config
 
-# 启用插件
-plugins=(
-    "luci-app-dockerman"
-    "luci-app-adguardhome"
-    "luci-app-oaf"
-    "luci-app-ddnsto"
-    "luci-app-mosdns"
-    "luci-app-openclash"
-    "luci-app-lucky"
-    "luci-app-ddns"
-    "luci-app-smartdns"
-    "luci-app-alist"
-    "luci-app-ksmbd"
-    "luci-app-ttyd"
-    "luci-app-upnp"
-    "luci-app-nikki"
-    "luci-app-quickstart"
-    "luci-app-diskman"
-    "luci-app-poweroff"
-    "luci-app-partexp"
-    "luci-app-netdata"
-    "luci-app-store"
-    "luci-app-homeassistant"
-)
+# 设置管理 IP
+sed -i 's/192.168.1.1/192.168.6.1/g' package/base-files/files/bin/config_generate
 
-for pkg in "${plugins[@]}"; do
-    echo "CONFIG_PACKAGE_${pkg}=y" >> .config
-done
+# 设置主机名
+sed -i 's/OpenWrt/Openwrt-NIT/g' package/base-files/files/bin/config_generate
 
-# 更换固件内核为 6.6
-echo "CONFIG_LINUX_6_6=y" >> .config
-echo "CONFIG_LINUX_6_6_USE_LATEST=y" >> .config
-echo "CONFIG_DEFAULT_LINUX_6_6=y" >> .config
+# 配置 ttyd 自动登录
+sed -i '/ttyd/s/^#//' package/feeds/packages/ttyd/files/ttyd.config
 
-# 个性签名,默认增加年月日[$(TZ=UTC-8 date "+%Y.%m.%d")]
-export Customized_Information="04543473 $(TZ=UTC-8 date "+%Y.%m.%d")"
-echo "CONFIG_CUSTOMIZED_INFORMATION=\"$Customized_Information\"" >> .config
+# 设置内核和系统分区大小
+sed -i 's/CONFIG_TARGET_KERNEL_PARTSIZE=.*/CONFIG_TARGET_KERNEL_PARTSIZE=128/' .config
+sed -i 's/CONFIG_TARGET_ROOTFS_PARTSIZE=.*/CONFIG_TARGET_ROOTFS_PARTSIZE=1024/' .config
 
-# 网络优化配置
-echo "CONFIG_PACKAGE_kmod-tcp-bbr=y" >> .config
-echo "CONFIG_PACKAGE_kmod-fs-antfs=y" >> .config
-echo "CONFIG_PACKAGE_kmod-usb3=y" >> .config
+# 设置个性签名
+echo "04543473-$(TZ=UTC-8 date "+%Y.%m.%d")" >> package/base-files/files/etc/banner
+
+# 更换内核版本
+sed -i 's/KERNEL_PATCHVER:=.*/KERNEL_PATCHVER:=6.6/' target/linux/*/Makefile
+
+# 添加 AdGuardHome 插件
+git clone https://github.com/rufengsuixing/luci-app-adguardhome.git package/luci-app-adguardhome
